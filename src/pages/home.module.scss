@@ -1,1 +1,36 @@
-// TODO
+.post {
+  display: block;
+
+  h1 {
+    color: var(--gray-100);
+  }
+
+  & + .post {
+    margin-top: 2rem;
+    padding-top: 2rem;
+  }
+
+  p {
+    margin-top: 0.5rem;
+  }
+
+  & > div {
+    margin-top: 1rem;
+
+    span + span {
+      margin-left: 1.5rem;
+    }
+  }
+}
+
+.loadMorePosts {
+  color: var(--pink-500);
+  font-weight: 600;
+  margin-top: 4rem;
+  transition: filter 0.2s;
+
+  &:hover {
+    cursor: pointer;
+    filter: brightness(0.7);
+  }
+}

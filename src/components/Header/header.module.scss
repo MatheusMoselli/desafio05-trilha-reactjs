@@ -1,1 +1,19 @@
-// TODO
+.container {
+  width: 100%;
+  height: 6.5rem;
+  background: var(--gray-900);
+
+  .content {
+    max-width: 1120px;
+    height: 6.5rem;
+    margin: 0 auto;
+    padding: 0 2rem;
+
+    display: flex;
+    align-items: center;
+
+    img:hover {
+      cursor: pointer;
+    }
+  }
+}
