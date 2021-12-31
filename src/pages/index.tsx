@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import ptBr from 'date-fns/locale/pt-BR';
 import { useEffect, useState } from 'react';
+import { usePosts } from '../hooks/usePosts';
 
 interface Post {
   uid?: string;
@@ -28,11 +29,22 @@ interface PostPagination {
 
 interface HomeProps {
   postsPagination: PostPagination;
+  preview: boolean;
 }
 
-export default function Home({ postsPagination }: HomeProps) {
+export default function Home({ postsPagination, preview }: HomeProps) {
+  const { setPosts: setGlobalPosts } = usePosts();
   const [posts, setPosts] = useState(postsPagination.results);
   const [hasNextPage, setHasNextPage] = useState(!!postsPagination.next_page);
+
+  useEffect(() => {
+    setGlobalPosts(
+      posts.map(post => ({
+        title: post.data.title,
+        uid: post.uid,
+      }))
+    );
+  }, [posts]);
 
   const handleLoadMorePosts = async () => {
     const response = await fetch(postsPagination.next_page);
@@ -81,17 +93,29 @@ export default function Home({ postsPagination }: HomeProps) {
           Carregar mais posts
         </p>
       )}
+
+      {preview && (
+        <aside>
+          <Link href="/api/exit-preview">
+            <a>Sair do modo Preview</a>
+          </Link>
+        </aside>
+      )}
     </div>
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps<HomeProps> = async ({
+  preview = false,
+  previewData,
+}) => {
   const prismic = getPrismicClient();
   const postsResponse = await prismic.query(
     [Prismic.predicates.at('document.type', 'posts')],
     {
       fetch: ['posts.title', 'posts.subtitle', 'posts.author'],
       pageSize: 20,
+      ref: previewData?.ref ?? null,
     }
   );
 
@@ -109,7 +133,7 @@ export const getStaticProps: GetStaticProps = async () => {
   };
 
   return {
-    props: { postsPagination },
+    props: { postsPagination, preview },
     revalidate: 60 * 60 * 24, // 1 day
   };
 };

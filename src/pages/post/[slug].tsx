@@ -8,9 +8,15 @@ import styles from './post.module.scss';
 import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 import { format } from 'date-fns';
 import { useRouter } from 'next/router';
+import { useUtterances } from '../../hooks/useUtterances';
+import { Fragment } from 'react';
+import { usePosts } from '../../hooks/usePosts';
+import Link from 'next/link';
 
 interface Post {
+  uid: string;
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -33,6 +39,11 @@ interface PostProps {
 export default function Post({ post }: PostProps) {
   const router = useRouter();
   if (router.isFallback) return <p>Carregando...</p>;
+  useUtterances('comments');
+
+  const { getNextPost, getPreviousPost } = usePosts();
+  const previous_post = getPreviousPost(post.uid);
+  const next_post = getNextPost(post.uid);
 
   const readingTime = post.data.content.reduce((total, current) => {
     const totalWords = RichText.asText(current.body).split(/\s+/).length;
@@ -59,21 +70,56 @@ export default function Post({ post }: PostProps) {
               <FiClock /> {Math.ceil(readingTime / 200)} min
             </span>
           </div>
+          {post.last_publication_date && (
+            <span className={styles.lastEdited}>
+              * editado em{' '}
+              {format(
+                new Date(post.last_publication_date),
+                "dd MMM yyyy, 'às' hh:mm",
+                {
+                  locale: ptBR,
+                }
+              )}
+            </span>
+          )}
 
           <div className={styles.content}>
             {post.data.content.map(content => {
               return (
-                <>
+                <Fragment key={Math.random()}>
                   <h2>{content.heading}</h2>
                   {content.body.map(body => (
                     <p key={Math.random()}>{body.text}</p>
                   ))}
-                </>
+                </Fragment>
               );
             })}
           </div>
         </article>
+
+        {(next_post || previous_post) && (
+          <div className={styles.changePost}>
+            {previous_post && (
+              <div className={styles.btnChangePost}>
+                <h2>{previous_post.title}</h2>
+                <Link href={`/post/${previous_post.uid}`}>
+                  <a>Post anterior</a>
+                </Link>
+              </div>
+            )}
+
+            {next_post && (
+              <div className={styles.btnChangePost}>
+                <h2>{next_post.title}</h2>
+                <Link href={`/post/${next_post.uid}`}>
+                  <a>Próximo post</a>
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+      <div className={styles.comments} id="comments" />
     </>
   );
 }
@@ -105,6 +151,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   const post = {
     first_publication_date: response.first_publication_date,
+    last_publication_date: response.last_publication_date,
     uid: response.uid,
     data: {
       title: response.data.title,

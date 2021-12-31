@@ -18,6 +18,12 @@
     }
   }
 
+  .lastEdited {
+    display: block;
+    font-style: italic;
+    margin-top: 0.5rem;
+  }
+
   .content {
     h2 {
       font-weight: 700;
@@ -31,6 +37,29 @@
       & + p {
         margin-top: 1.5rem;
       }
+    }
+
+    padding-bottom: 3.75rem;
+    margin-bottom: 3.75rem;
+    border-bottom: 1px solid #d7d7d718;
+  }
+}
+
+.changePost {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .btnChangePost {
+    h2 {
+      font-weight: normal;
+    }
+
+    a {
+      display: block;
+      margin-top: 1rem;
+      color: var(--pink-500);
+      font-weight: bold;
     }
   }
 }
